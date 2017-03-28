@@ -6,11 +6,10 @@
         <webroots>
           <root url="file://$MODULE_DIR$/../../../recommendationEngine/src/main/webapp" relative="/" />
         </webroots>
-        <sourceRoots />
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="false">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
     <output url="file://$MODULE_DIR$/../../../recommendationEngine/build/classes/main" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/../../../recommendationEngine/grails-app">
@@ -61,7 +60,7 @@
     <orderEntry type="library" name="Gradle: org.hibernate:hibernate-ehcache:5.1.1.Final" level="project" />
     <orderEntry type="library" name="Gradle: org.grails.plugins:views-json:1.1.2" level="project" />
     <orderEntry type="library" name="Gradle: org.grails.plugins:views-json-templates:1.1.2" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: org.codehaus.groovy:groovy-ant:2.4.7" level="project" />
+    <orderEntry type="library" name="Gradle: org.codehaus.groovy:groovy-ant:2.4.7" level="project" />
     <orderEntry type="library" name="Gradle: ch.qos.logback:logback-classic:1.1.7" level="project" />
     <orderEntry type="library" name="Gradle: org.slf4j:jcl-over-slf4j:1.7.21" level="project" />
     <orderEntry type="library" name="Gradle: org.slf4j:jul-to-slf4j:1.7.21" level="project" />
@@ -69,7 +68,7 @@
     <orderEntry type="library" name="Gradle: org.slf4j:log4j-over-slf4j:1.7.21" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework.boot:spring-boot:1.4.1.RELEASE" level="project" />
     <orderEntry type="library" name="Gradle: xalan:serializer:2.7.2" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: org.codehaus.groovy:groovy:2.4.7" level="project" />
+    <orderEntry type="library" name="Gradle: org.codehaus.groovy:groovy:2.4.7" level="project" />
     <orderEntry type="library" name="Gradle: org.slf4j:slf4j-api:1.7.21" level="project" />
     <orderEntry type="library" name="Gradle: org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final" level="project" />
     <orderEntry type="library" name="Gradle: com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.4.2" level="project" />
@@ -125,17 +124,17 @@
     <orderEntry type="library" name="Gradle: org.hibernate.common:hibernate-commons-annotations:5.0.1.Final" level="project" />
     <orderEntry type="library" name="Gradle: net.sf.ehcache:ehcache:2.10.2.2.21" level="project" />
     <orderEntry type="library" name="Gradle: org.grails:views-core:1.1.2" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: org.apache.ant:ant:1.9.4" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: org.apache.ant:ant-antlr:1.9.4" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: org.apache.ant:ant-launcher:1.9.4" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: org.codehaus.groovy:groovy-groovydoc:2.4.7" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: org.apache.ant:ant-junit:1.9.4" level="project" />
+    <orderEntry type="library" name="Gradle: org.apache.ant:ant:1.9.4" level="project" />
+    <orderEntry type="library" name="Gradle: org.apache.ant:ant-antlr:1.9.4" level="project" />
+    <orderEntry type="library" name="Gradle: org.apache.ant:ant-launcher:1.9.4" level="project" />
+    <orderEntry type="library" name="Gradle: org.codehaus.groovy:groovy-groovydoc:2.4.7" level="project" />
+    <orderEntry type="library" name="Gradle: org.apache.ant:ant-junit:1.9.4" level="project" />
     <orderEntry type="library" name="Gradle: ch.qos.logback:logback-core:1.1.7" level="project" />
     <orderEntry type="library" name="Gradle: commons-logging:commons-logging:1.2" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework:spring-aop:4.3.3.RELEASE" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework:spring-expression:4.3.3.RELEASE" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: org.codehaus.groovy:groovy-xml:2.4.7" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: org.codehaus.groovy:groovy-templates:2.4.7" level="project" />
+    <orderEntry type="library" name="Gradle: org.codehaus.groovy:groovy-xml:2.4.7" level="project" />
+    <orderEntry type="library" name="Gradle: org.codehaus.groovy:groovy-templates:2.4.7" level="project" />
     <orderEntry type="library" name="Gradle: org.yaml:snakeyaml:1.17" level="project" />
     <orderEntry type="library" name="Gradle: com.fasterxml.jackson.core:jackson-databind:2.8.3" level="project" />
     <orderEntry type="library" name="Gradle: org.hibernate:hibernate-validator:5.2.4.Final" level="project" />
