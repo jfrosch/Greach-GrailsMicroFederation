@@ -1,0 +1,29 @@
+Please read these instructions before starting the lab work in the Greach workshop.
+
+Requirements:
+
+You will need JDK 8 and Git for this workshop.
+
+Notes:
+
+This workshop project is structured as a multi-module project, with each module representing an individual microservice in the federation.
+
+Two of the services are implemented in Grails 3.x. Three of the services are simple Spring Cloud services providing cross-cutting support
+services to the federation. A "real" application would include many more business services, redundant discovery services, etc., but
+this small federation is a foundation you can use to start building your own microservice federation.
+
+The master branch represents the working solution. The workshop branch is the branch you will do your lab work work against. The directions
+will specify the particular project and artifact to modify. If you get stuck, just compare the artifact being modified in the workshop
+branch with the one in master.
+
+Workshop Labs
+
+Lab 1: Create a Product Catalog
+
+Lab 2: Create a Recommendation Engine
+
+Lab 3: Create a Discovery Service
+
+Lab 4: Create a Revers Proxy API Gateway
+
+Lab 5: Add Monitoring and Circuit Breakers
