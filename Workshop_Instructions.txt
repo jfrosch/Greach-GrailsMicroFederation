@@ -225,7 +225,6 @@ Lab 4: Create a Eureka Discovery Service
 			        EMERGENCY! EUREKA MAY BE INCORRECTLY CLAIMING INSTANCES ARE UP WHEN THEY'RE NOT.
 			        RENEWALS ARE LESSER THAN THRESHOLD AND HENCE THE INSTANCES ARE NOT BEING EXPIRED JUST TO BE SAFE.
 
-				This just means, "Hey! There's only one EurekaServer instance running"
 			 d. Notice the dashboard says, "No instances available" ubder "Instances currently registered with Eureka"
 
 		ii.  Start ProductCatalog
