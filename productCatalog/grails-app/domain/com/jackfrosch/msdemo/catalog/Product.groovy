@@ -4,7 +4,7 @@ class Product {
     String sku
     String name
     String description
-    BigDecimal msrp
+    BigDecimal msrp // manufacturer's suggested retail price
     String tags
 
     static constraints = {
