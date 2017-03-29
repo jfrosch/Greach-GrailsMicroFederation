@@ -31,7 +31,10 @@ master
                                   |
                                   |- workshop_lab6_solution
 
-To begin, checkout the Workshop branch
+To begin, checkout the Workshop branch.
+
+IMPORTANT: Whenever you change branches, do a "gradle clean" then a "gradle build" to ensure you're starting from a known good set of
+           compiled classes.
 
 Workshop Labs
 
@@ -240,7 +243,66 @@ Lab 4: Create a Eureka Discovery Service
 
 	J. Stop all the services
 
-
 Lab 5: Create a Reverse Proxy API Gateway
+
+	Well, Eureka is useful, but to leverage the service registration, we'd have to call Eureka' API, find the IP and port for a service, then
+	make our calls to that. That would work, but would be tedious.
+
+	Instead, we're going to leveral Zuul, a reverse-proxy service Netflix also donated. Now, all of our REST API calls within the federation,
+	will and from without, will go through the Zuul server. Zuul will call Eureka and find out what the IP/port is for the service,
+
+	Set up is super easy, so this will be a fast lab:
+
+	A. Review the build.gradle dependencies for the ZuulProxySpringBoot project
+
+	B. Review the application.yml file
+
+		i.   It specifies the port as 8765. We'll leverage that soon.
+		ii.  Pay careful attention to this configuration:
+
+				zuul:
+                  routes:
+                    product-catalog: /product-catalog/**
+                    recommendation-engine: /recommendation-engine/**
+
+			 This says, "Any request coming in for any URI starting with /product-catalog will be sent to a product-catalog instance as
+			 indicated by Eureka. Any request coming in for any URI starting with /recommendation-engine will be sent to a
+			 recommendation-engine instance as indicated by Eureka."
+
+	C. Open the zuulProxySpringBoot projects's ZuulServerApplication class
+
+		i.   Add the @EnableZuulProxy annotation to the class to enable the app to work as a Zuul Proxy Server
+        ii.  Add the @EnableDiscoveryClient annotation to the class so it will register with the Eureka server
+
+    D. The ProductCatalog microservice hardcoded the IP/port for the RecommendationEngine in the ProductDetailsDecoratorService. Change
+       that hardcoded reference
+
+        from: "http://localhost:8092/findRecommendation/${product.id}"
+        to: "http://localhost:8765/recommendation-engine/findRecommendation/${product.id}"
+
+    E. In ProductCatalog and RecommendationEngine application.yml files, change the port to be 0. This will cause a randowm available port
+       to be assigned
+
+    F. Start the applications in this order:
+
+        i.   Eureka Server
+        ii.  Product Catalog
+        iii. Recommendation Engine
+        iv.  Zuul Server
+
+		It's not that they have to be started in this order, but you'll see a bunch of stacktraces otherwise until all apps are started.
+
+		NOTE: It can take up to 90 seconds for all of these collaborations to get services registered.
+
+	G. Review Eureka by opening a browser and navigating to localhost:8761. Note that Zuul is now present.
+
+	H. Test the microservice federation
+
+		i.   Query for product details using this: curl localhost:8765/product-catalog/productDetails/1
+		     (Notice we're querying through Zuul, not to the IP/port of ProductCatalog)
+
+		ii.  Note: Sometimes Zuul is a little slow learning about its services defined in it routes. When you first query it, you may get a
+		     500 error. Give it a 15 - 30 seconds and try again.
+
 
 Lab 6: Add Monitoring and Circuit Breakers
