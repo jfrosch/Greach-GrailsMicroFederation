@@ -238,7 +238,7 @@ Lab 4: Create a Eureka Discovery Service
 
 	I. Nothing much has changed as you'll see if you run this: curl localhost:8091/productDetails/1
 
-	J. Stop the RecommendationEngine service. Watch for a change in the EurekaServer UI. What did you see?
+	J. Stop all the services
 
 
 Lab 5: Create a Reverse Proxy API Gateway
