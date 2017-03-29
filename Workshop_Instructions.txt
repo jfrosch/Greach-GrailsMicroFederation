@@ -306,3 +306,124 @@ Lab 5: Create a Reverse Proxy API Gateway
 
 
 Lab 6: Add Monitoring and Circuit Breakers
+
+	Wow! How far we have come. We started out with a couple of useful microservices that were hardcoded for IP and ports. We really couldn't
+	scale them with multiple instances because of this. We added a Eureka server to register and load balance our services. We then added a
+	Zuul server to map the canonical routes to our API endpoints so that our services, and public clients calling into our application,
+	need only kow how to get to our Zuul server; i.e. via DNS.
+
+	We have only one issue left for our workshop: How to guard against service failures cascading forward using Circuit Breakers. Also, how
+	can we monitor the app to know when something is going/has gone wrong?
+
+	For this, we'll leverage one more Netflix contribution, Hystrix. Again, it's super, super easy to set up. Let's get started:
+
+	A. Review the HystrixDashboardSpringBootProject application.yml. Note its IP address is 7979. We'll use that to access a nice dashboard
+
+	B. Review the build.gradle file dependencies needed
+
+	C. Add the following annotations to the HystrixDashboardApplication class:
+
+		@EnableHystrixDashboard
+        @EnableDiscoveryClient
+
+       The @EnableHystrixDashboard annotation gives us the capabilities for the dashboard, but we need to enable circuit breakers in our app.
+       Our app needs a circuit breaker at the point the ProductCatalog ProductDetailsDecoratorService calls the RecommendationEngine service
+       to get recommendations for a Product being examined for purchase.
+
+	D. Open the productcatalog.Application class. Add this annotation to enable Hystrix circuit breakers in the application:
+
+		@EnableHystrix
+
+	E. Open the ProductCatalog ProductDetailsDecoratorService
+
+		i.   Add this annotation to the findRecommendations method:
+
+				@HystrixCommand(fallbackMethod = "defaultRecommendations")
+
+			 This says, "If any exception happens in this findRecommendations method, fallback to the defaultRecommendations method."
+
+		ii.  Add this as the defaultrecommendations method:
+
+				List<Product> defaultRecommendations(Product product) {
+                    Product.findAllByTagsIlike('%cat%')
+                }
+
+             This says we'll return Cat calendar products by default if the Recommendation Engine fails. I'm sure the Star Trek fans will
+             appreciate getting Cat calendar recommendations!
+
+    F. Test this as follows:
+
+	    i. Start the services in this order:
+
+	       a.   Eureka Server
+	       b.  Product Catalog
+	       b. Recommendation Engine
+	       c.  Zuul Server
+	       d.   Hystrix Dashboard service
+
+
+	    ii. Open a new browser window
+
+	        a.   Navigate to localhost:7979/hystrix
+
+	        b.  In the field below the label "Hystrix Dashboard" enter: http://localhost:8765/hystrix.stream
+
+	             Note that this port is for our Zuul server address
+
+	        c. In the Title field, enter "Demo"
+
+	        d.  Click on Montor Stream button
+
+	    iii. Execute this request:
+
+	            curl localhost:8765/product-catalog/productDetails/8
+
+	       Notice, we're getting product id = 8, not 1 as before. You'll get this as data:
+
+	       {"product":{"id":8,"description":"A full year's worth of iconic imagery from the original Star Trek series",
+	          "msrp":15.99,"name":"Classic Trek 2017 Calendar","sku":"S1238",
+	          "tags":"kirk,spock,mccoy,scotty,uhura,checkov,sulu,chapel,star trek"},
+	          "recommendedProducts":[{"id":9,
+	          "description":"For Next Generation fans, a great collection of iconic imagery from the Star Trek NG",
+	          "msrp":16.99,"name":"NG Trek 2017 Calendar","sku":"S1239",
+	          "tags":"data,frakes,picard,troi,crusher,worf,star trek,star trek ng"},
+	          {"id":10,
+	          "description":"Never forget Deep Space 9 with this collection of iconic imagery from the ground breaking series",
+	          "msrp":11.99,"name":"Deep Space 9 2017 Calendar","sku":"S1210",
+	          "tags":"sisko,odo,quark,worf,nerys,dax,o'brien,star trek,deep space 9"}]}
+
+	    iv.  While monitoring the Hystrix Dashboard, execute several of the same requests in rapid succession. Watch the data change in
+	         the dashboard
+
+    G. Test the circuit breaker
+
+        i.   Stop the recommendation engine
+
+        ii.  Refresh the Eureka dashboard until the recommendation Engine service is gone
+
+        iii. Execute the same request as before:   curl localhost:8765/product-catalog/productDetails/8
+
+        iv. Notice you now get this result:
+
+            {"product":{"id":8,"description":"A full year's worth of iconic imagery from the original Star Trek series",
+            "msrp":15.99,"name":"Classic Trek 2017 Calendar","sku":"S1238",
+            "tags":"kirk,spock,mccoy,scotty,uhura,checkov,sulu,chapel,star trek"},
+            "recommendedProducts":[{"id":1,"description":"Only cats in this playful 2017 calendar","msrp":14.99,
+            "name":"Here Kitty Kitty 2017 Calendar","sku":"S1231","tags":"cat,cats,kitten,kittens"},
+            {"id":2,"description":"Cats rule and dogs drool in this inter-species rivalry calendar","msrp":15.99,
+            "name":"Raining Cats and Dogs 2017 Calendar","sku":"S1232","tags":"cat,cats,dog,dogs"}]}
+
+            Notice, we're now getting Cat calendar recommendations when the product we were looking at was a Star Trek calendar! While
+            perhaps a lousy business practice, clearly our circuit breaker has tripped.
+
+        v.  While monitoring the Hystrix Dashboard, execute several of the same requests in rapid succession. Watch the data change in
+            the dashboard. Notice the Recommendation Engine is not processing any requests
+
+    H. Restart the Recommendation Engine, watch for it to show up in Euereka and repeat the queries. The key thing to note here is, Hystrix
+       doesn't immediately close the circuit. It's smart and knows a lot of times servers seems to come back to life but fall over almost
+       immediately. So after a few queries that result in no exception, Hystrix closes the circuit breaker and starts sending requests to
+       the recommendation engine again.
+
+
+    That's all folks! Email me with questions or issues: jackfrosch@gmail.com
+
