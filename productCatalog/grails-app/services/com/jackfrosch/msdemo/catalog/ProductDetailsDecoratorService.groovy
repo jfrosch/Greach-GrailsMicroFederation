@@ -8,7 +8,7 @@ class ProductDetailsDecoratorService {
 
     List<Product> findRecommendations(Product product) {
         RestBuilder rest = new RestBuilder()
-        def resp = rest.get("http://localhost:8092/findRecommendation/${product.id}")
+        def resp = rest.get("http://localhost:8765/recommendation-engine/findRecommendation/${product.id}")
 
         if(resp.status == 500) {
             throw new RuntimeException("Error calling recommendation engine")
