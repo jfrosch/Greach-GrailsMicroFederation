@@ -16,6 +16,11 @@ The master branch represents the working solution. The workshop branch is the br
 will specify the particular project and artifact to modify. If you get stuck, just compare the artifact being modified in the workshop
 branch with the one in master.
 
+In addition, if you get stuck and fall behind, the solution for each completed lab after Lab 3 will be in its own branch;
+i.e. workshop_lab4_solution. You can just checkout that lab and start from there.
+
+To begin, checkout the Workshop
+
 Workshop Labs
 
 Lab 1: Review ProductCatalog
