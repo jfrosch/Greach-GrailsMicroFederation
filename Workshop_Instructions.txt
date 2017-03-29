@@ -19,7 +19,19 @@ branch with the one in master.
 In addition, if you get stuck and fall behind, the solution for each completed lab after Lab 3 will be in its own branch;
 i.e. workshop_lab4_solution. You can just checkout that lab and start from there.
 
-To begin, checkout the Workshop
+To summarize, the branches in graphic form look like this:
+
+master
+  |
+  |- workshop
+        |
+        |- workshop_lab4_solution
+                     |
+                     |- workshop_lab5_solution
+                                  |
+                                  |- workshop_lab6_solution
+
+To begin, checkout the Workshop branch
 
 Workshop Labs
 
@@ -160,7 +172,8 @@ Lab 4: Create a Eureka Discovery Service
 			d. The spring-cloud-starter-eureka-server dependency informs us what this service is about
 
 	B. Review the application.yml in src/main/resources. We've hardcoded the port to be 8761, but if we wanted to run multiple instances,
-	   we'd specify 0. Services register with Eureka through annotation, not with a direct API call.
+	   we'd specify 0. Services register with Eureka through annotation, not with a direct API call. (Also notice that this app is itself
+	   configured as a Eureka client. More on that later.)
 
 	C. Open the com.jackfrosch.msdemo.EurekaServerApplication class. At this point, it's just a plain ol' SpringBoot application.
 
@@ -169,42 +182,63 @@ Lab 4: Create a Eureka Discovery Service
 
 		@EnableEurekaServer
 
-    E. A EurekaServer can also register itself with registries and learn its own IP and port. To enable this,
-       add the following annotation to the EurekaServerApplication class:
+    E. A EurekaServer can also register itself with registries and learn its own IP and port. To enable this:
 
-        @EnableDiscoveryClient
+       i.   Add the following annotation to the EurekaServerApplication class:
+
+                @EnableDiscoveryClient
+
+       ii.  Add the following Spring MVC controller on the
+
 
 	F. Of course, we also want our ProductCatalog and RecommendationEngine to register themselves with the EurekaServer. This will
 	   allow multiple instances to be load balanced and requests sent to their registered IPs and ports. Fortunately, it's trivial
-	   to accomplish this. Add the following annotation to the Application classes in the init folders in BOTH the productCatalog and
-	   recommendationEngine projects:
+	   to accomplish this. Add the following annotation to the Application classes in the grails-app/init folders in BOTH the
+	   productCatalog and recommendationEngine projects:
 
 		@EnableEurekaClient
 
 	   (Did you remember to add it in both?)
 
 	G. We need to make some config changes as well, so add the following config into the application.yml file for *both* the productCatalog
-	   and RecommendationEngine projects below the spring.application.name config:
+	   and RecommendationEngine projects below the spring.application.name config (maintain the 2-char indentation as below):
 
-	   eureka:
-         client:
-           registryFetchIntervalSeconds: 5
-           serviceUrl:
-             defaultZone: http://eureka:admin@127.0.0.1:8761/eureka/
-         instance:
-           preferIpAddress: true
-           leaseRenewalIntervalInSeconds: 10
-           metadataMap:
-             instanceId: ${spring.application.name}:${spring.application.instance_id}:${random.int}
+		   eureka:
+	         client:
+	           registryFetchIntervalSeconds: 5
+	           serviceUrl:
+	             defaultZone: http://eureka:admin@127.0.0.1:8761/eureka/
+	         instance:
+	           preferIpAddress: true
+	           leaseRenewalIntervalInSeconds: 10
+	           metadataMap:
+	             instanceId: ${spring.application.name}:${spring.application.instance_id}:${random.int}
 
-	H. Now, start the applications (gradlew bootRun) in the following order
+	H. Now, start the microservices (gradlew bootRun) in the following order
 
-		i.      eurekaServerSpringBoot
-		ii.     productCatalog
-		iii.    recommendationEngine
+		i.   eurekaServerSpringBoot
 
-	I. Once all apps have started, open a browser and navigate to localhost:8761. You should see the product-catalog and
-	   recommendation-engine entries listed. (The service names are the names configured in spring.application.name.)
+			 a. Watch for Started EurekaServerApplication in 23.099 seconds
+			 b. Open a browser and navigate to localhost:8761
+			 c. Ignore this alarmist message:
+
+			        EMERGENCY! EUREKA MAY BE INCORRECTLY CLAIMING INSTANCES ARE UP WHEN THEY'RE NOT.
+			        RENEWALS ARE LESSER THAN THRESHOLD AND HENCE THE INSTANCES ARE NOT BEING EXPIRED JUST TO BE SAFE.
+
+				This just means, "Hey! There's only one EurekaServer instance running"
+			 d. Notice the dashboard says, "No instances available" ubder "Instances currently registered with Eureka"
+
+		ii.  Start ProductCatalog
+
+			 a. Watch the console for it to start
+			 b. Refresh the Eureka dashboard. You should see PRODUCT-CATALOG instance is registered with Eureka
+
+		iii. Start RecommendationEngine
+
+			 a. Watch the console for it to start
+			 b. Refresh the Eureka dashboard. You should see RECOMMENDATION-ENGINE instance is registered with Eureka
+
+	I. Nothing much has changed as you'll see if you run this: curl localhost:8091/productDetails/1
 
 	J. Stop the RecommendationEngine service. Watch for a change in the EurekaServer UI. What did you see?
 
