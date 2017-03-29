@@ -182,13 +182,12 @@ Lab 4: Create a Eureka Discovery Service
 
 		@EnableEurekaServer
 
-    E. A EurekaServer can also register itself with registries and learn its own IP and port. To enable this:
-
-       i.   Add the following annotation to the EurekaServerApplication class:
+    E. A EurekaServer can also register itself with registries and learn its own IP and port. To enable this add the following annotation
+       to the EurekaServerApplication class:
 
                 @EnableDiscoveryClient
 
-       ii.  Add the following Spring MVC controller on the
+       (We won't be using that capability in this workshop.)
 
 
 	F. Of course, we also want our ProductCatalog and RecommendationEngine to register themselves with the EurekaServer. This will
