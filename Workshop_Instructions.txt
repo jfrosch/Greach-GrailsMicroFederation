@@ -16,14 +16,199 @@ The master branch represents the working solution. The workshop branch is the br
 will specify the particular project and artifact to modify. If you get stuck, just compare the artifact being modified in the workshop
 branch with the one in master.
 
+In addition, if you get stuck and fall behind, the solution for each completed lab after Lab 3 will be in its own branch;
+i.e. workshop_lab4_solution. You can just checkout that lab and start from there.
+
+To begin, checkout the Workshop
+
 Workshop Labs
 
-Lab 1: Create a Product Catalog
+Lab 1: Review ProductCatalog
 
-Lab 2: Create a Recommendation Engine
+	A. Unless you're planning on selling Cat or Star Trek calendars, I don't think the domain specifics of the Product Catalog
+	will be all that exciting. We're modeling a simple, "Catalog has many CatalogItems each of which is related to a Product and has a
+	price." Note the following:
 
-Lab 3: Create a Discovery Service
+		i.   Catalog has a couple of custom validations to enforce reasonableness on a Catalog's publication and expiration dates.
+		ii.  Product has a String field called "tags". As we'll see, these will be used by the Recommendation Engine to find other calendars
+			 that we can "upsell" to the the customer while she's reviewing a particular calendar
 
-Lab 4: Create a Revers Proxy API Gateway
+	B. Open the conf/application.yml file. Note the following:
 
-Lab 5: Add Monitoring and Circuit Breakers
+		i.   We're setting the port as 8091. We'll need to know this when we make an REST API call to get the product details. We will start
+			 out with a known port number, but what's the disadvantage of doing so?
+		ii.  The Grails application was created with grails.profile: rest-api. For microservices, this profile is preferred over the
+			 default Grails web monolith profile - unless your microservice is a web app of course.
+		iii. Notice the datasource. In this case. we're using a simple in-memory H2 database. The key microservice characteristic is, the
+			 ProductCatalog microservice "owns" its own data. In general, this datasource should not be shared with other microservices.
+			 This doesn't mean two ProductCatalog instances should each have their own datasource; they should.
+		iv.  The application has a runtime name as specified by this entry:  spring.application.name: product-catalog
+
+
+	C. Open the grails-app/init/productcatalog/Bootstrap.groovy script
+
+		i.   In Bootstrap, we seed the database with some Products, CatalogItems and a Catalog
+		ii.  For this workshop, we're not distingusihing between the Production, Test, and Development environments, but we would really
+			 want to only seed this data for our Development and/or Test environments
+
+	D. Open the grails-app/controllers/com.jackfrosch.msdemo.catalog.ProductController class and note the following:
+
+		i.   ProductController extends RestfulController. RestfulController gives us basic RESTful endpoints for doing CRUD
+		ii.  We added a "productDetails" action method. We could have overriden the show method which is semantically the same
+		iii. Notice that productDetails handles requests for JSON or XML response content. I love it when Grails makes things so easy!
+
+
+	E. Open the grails-app/controllers/productcatalog/UrlMappings.groovy file and note the following:
+
+		i.   The Grails rest-api profile gives us some default CRUD endpoints
+		ii.  We added a new one for /productDetails, but as noted, could have just as easily overriden the show method
+		iii. We are leveraging a feature of Grails, where if the command object argument to the action method is a domain entity, and the id
+		     is sent as a request parm, Grails will fetch the entity and pass the entity into the action
+
+	F. Open the grails-app/services/com.jackfrosch.msdemo.catalog.ProductDetailsDecoratorService and note the following:
+
+		i.   As the name says, this service will be used to decorate our Product details. In our case, we're just calling the
+		     RecommendationEngine to get recommendations for a particular product id
+		ii.  You might think this implies we're sharing Product database with the RecommendationEngine, but we're not as we'll see
+		iii. If the Recommendation sends back a 500, we throw an exception. What if we can't connect to it at all; i.e. the service is down?
+		     Let's just say our customer's shopping experience is going to end up giving us a 1-star rating!
+
+	G. We'll run this little federation soon to see what it's doing, but first, let's review the RecommendationEngine
+
+Lab 2: Review the RecommendationEngine
+
+	A. Look at the Product domain class. What's a Product class doing in our Domain, didn't we already have a Product class in ProductCatalog?
+	   We did, but that class is the Product as ProductCatalog needs to see it.
+
+		i.   This Product shares some of the ProductCatalog data making it equivalent to the ProductCatalog's Product, but it's really a
+	         different Product domain, the RecommendationEngine's Product.
+		ii.  See how we share the id, the sku. This let's us correlate this Product with the ProductCatalog's product
+		iii. We also have tags, but these are related to a dedicated Tag. The Tag represents a single ProductCatalog tag. This shows how
+	         important a Tag is to the RecommendationEngine. A Tag could have all sorts of attributes that the RecommmendationEngine can
+	         exploit to serve up the best recommendations
+
+	B. Open the conf/application.yml file. Note the following:
+
+		i.   The RecommendationEnginer has a fixed port of 8092. That port number is referenced explicitly by the ProductCatalog's
+		     ProductDetailsDecoratorService
+		ii.  Its datasource is independent of the ProductCatalog datasource - as we would expect
+
+	C. Open the grails-app/init/productcatalog/Bootstrap.groovy script
+
+		i.   We add some Products (of the RecommendationEngine varierty!) and associated Tags
+		ii.  Notice we create a reusable Closure to help us create the Tag entities. You gotta love Groovy!
+
+	D. Open the grails-app/controllers/com.jackfrosch.msdemo.catalog.RecommendationController class and note the following:
+
+		i.   Notice, it is not a Restful controller. We could have just added the behavior on the ProductController, but did it this way
+		     mostly to show that, "religious arguments" aside, not every behavior has to be a Restful behavior.
+		ii.  Again, with the findRecommendation argument command object being the Product and the request parm being the id, Grails will
+		     load the Product automatically.
+
+Lab 3: Let's see this small federation is action
+
+	A. Open a terminal (shell) window and start the ProductCatalog service
+
+		i.   Change into the productCatalog project folder (where build.gradle is)
+		ii.  From the IDE, you can launch the Gradle | Tasks | application | bootRun
+		iii. From the command line, and run gradlew against the bootRun task; i.e. ./gradlew bootRun in *nix OS
+		iv.  We want to see this is the shell: "Grails application running at http://localhost:8091 in environment: development"
+
+	B. Open a terminal window and start the RecommendationEngine service
+
+		i.   Of course, do it from the recommendationEngine folder
+		ii.  We want to see this is the shell: "Grails application running at http://localhost:8092 in environment: development"
+
+	C. Open a terminal window and issue the following commands (or use your favorite REST Client tool like Postman):
+
+		i.   *nix OS: curl localhost:8091/productDetails/1
+		ii.  Windows OS: You can just use Groovy for simple GETs: groovy -e "println 'http://localhost:8091/productDetails/1'.toURL().text"
+		iii. The expected response is:
+
+				{"product":{"id":1,"description":"Only cats in this playful 2017 calendar","msrp":14.99,
+		         "name":"Here Kitty Kitty 2017 Calendar","sku":"S1231","tags":"cat,cats,kitten,kittens"},
+		         "recommendedProducts":[{"id":2,"description":"Cats rule and dogs drool in this inter-species rivalry calendar",
+		         "msrp":15.99,"name":"Raining Cats and Dogs 2017 Calendar","sku":"S1232","tags":"cat,cats,dog,dogs"}]}
+
+		iv. Notice the recommendedProducts is included
+
+	D. Repeat, but use this request: curl -H "Accept: text/xml" localhost:8091/productDetails/1
+
+		i.   Windows users will need to use a RestClient to set the header
+		ii.  The expected response is this:
+
+	            <?xml version="1.0" encoding="UTF-8"?><map><entry key="product" id="1">
+	            <description>Only cats in this playful 2017 calendar</description><msrp>14.99</msrp>
+	            <name>Here Kitty Kitty 2017 Calendar</name><sku>S1231</sku><tags>cat,cats,kitten,kittens</tags></entry>
+	            <entry key="recommendedProducts"><product id="2">
+	            <description>Cats rule and dogs drool in this inter-species rivalry calendar</description><msrp>15.99</msrp>
+	            <name>Raining Cats and Dogs 2017 Calendar</name><sku>S1232</sku><tags>cat,cats,dog,dogs</tags></product></entry></map>
+
+Lab 4: Create a Eureka Discovery Service
+
+	Netflix donated the Eureka project to open source. Eureka provides a scalable discovery service with
+	load balanacing. Through a simple annotation, microservice instances can register themselves with
+	Eureka when they start up. This way every microservice need not know the IP and port of all other instance
+	collaborators.
+
+	A. Review the eurekaServerSpringBoot project
+		i. Note that it's a SpringBoot project, not a Grails project
+		ii. Review its build.gradle file.
+			a. Notice the Java and spring-boot plugins in use
+			b. Note how we're using a mavenBOM to get a curated set of Spring Cloud dependency versions
+			c. The spring-boot-starter-actuator dependency is common to Spring Boot apps
+			d. The spring-cloud-starter-eureka-server dependency informs us what this service is about
+
+	B. Review the application.yml in src/main/resources. We've hardcoded the port to be 8761, but if we wanted to run multiple instances,
+	   we'd specify 0. Services register with Eureka through annotation, not with a direct API call.
+
+	C. Open the com.jackfrosch.msdemo.EurekaServerApplication class. At this point, it's just a plain ol' SpringBoot application.
+
+	D. We want to enable it to act as a EnableEurekaServer which keeps a service registry for us so every service need not know the IP
+	   and port of every other. To do this, add the following annotation to the EurekaServerApplication class:
+
+		@EnableEurekaServer
+
+    E. A EurekaServer can also register itself with registries and learn its own IP and port. To enable this,
+       add the following annotation to the EurekaServerApplication class:
+
+        @EnableDiscoveryClient
+
+	F. Of course, we also want our ProductCatalog and RecommendationEngine to register themselves with the EurekaServer. This will
+	   allow multiple instances to be load balanced and requests sent to their registered IPs and ports. Fortunately, it's trivial
+	   to accomplish this. Add the following annotation to the Application classes in the init folders in BOTH the productCatalog and
+	   recommendationEngine projects:
+
+		@EnableEurekaClient
+
+	   (Did you remember to add it in both?)
+
+	G. We need to make some config changes as well, so add the following config into the application.yml file for *both* the productCatalog
+	   and RecommendationEngine projects below the spring.application.name config:
+
+	   eureka:
+         client:
+           registryFetchIntervalSeconds: 5
+           serviceUrl:
+             defaultZone: http://eureka:admin@127.0.0.1:8761/eureka/
+         instance:
+           preferIpAddress: true
+           leaseRenewalIntervalInSeconds: 10
+           metadataMap:
+             instanceId: ${spring.application.name}:${spring.application.instance_id}:${random.int}
+
+	H. Now, start the applications (gradlew bootRun) in the following order
+
+		i.      eurekaServerSpringBoot
+		ii.     productCatalog
+		iii.    recommendationEngine
+
+	I. Once all apps have started, open a browser and navigate to localhost:8761. You should see the product-catalog and
+	   recommendation-engine entries listed. (The service names are the names configured in spring.application.name.)
+
+	J. Stop the RecommendationEngine service. Watch for a change in the EurekaServer UI. What did you see?
+
+
+Lab 5: Create a Reverse Proxy API Gateway
+
+Lab 6: Add Monitoring and Circuit Breakers
